@@ -19,8 +19,9 @@
 from Crypto.Cipher import AES
 import os
 import struct
+import json
 
-def encrypt_tuple(data_tuple, key):
+def encrypt_tuple(data_tuple, key, nonce=-1):
     """
     Wrapper for AES-GCM that runs on a secret-share tuple
 
@@ -31,10 +32,11 @@ def encrypt_tuple(data_tuple, key):
     Returns:
         nonce, ciphertext, tag (bytes): The result of AES-GCM is the encrypted ciphertext, the public random element (nonce) and the authentication tag
     """
-    # Convert the tuple to a byte string
-    data_bytes = struct.pack(f'>{len(data_tuple)}i', *data_tuple)
+    # Convert the tuple to a JSON string and encode to bytes
+    data_bytes = json.dumps(data_tuple).encode('utf-8')
     # Generate a random nonce
-    nonce = os.urandom(16)
+    if nonce == -1:
+        nonce = os.urandom(16)
     # Create the cipher object
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     # Encrypt the data
@@ -47,24 +49,24 @@ def decrypt_tuple(nonce, ciphertext, tag, key):
     cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
     # Decrypt the data
     plaintext = cipher.decrypt_and_verify(ciphertext, tag)
-    # Convert the byte string back to a tuple
-    data_tuple = struct.unpack(f'>{len(plaintext) // 4}i', plaintext)
+    # Convert the byte string back to a tuple using JSON
+    data_tuple = json.loads(plaintext.decode('utf-8'))
     # Return the tuple
     return data_tuple
 
-# Example usage
-key = os.urandom(32)  # Generate a random 256-bit key
-data_tuple = (1, 2, 3, 4, 5)
+# # Example usage
+# key = os.urandom(32)  # Generate a random 256-bit key
+# data_tuple = (1, 2, 3, 4, 5)
 
-# Encrypt the tuple
-nonce, ciphertext, tag = encrypt_tuple(data_tuple, key)
+# # Encrypt the tuple
+# nonce, ciphertext, tag = encrypt_tuple(data_tuple, key)
 
-print(nonce)
-print(ciphertext)
-print(tag)
+# print(nonce)
+# print(ciphertext)
+# print(tag)
 
-# Decrypt the tuple
-decrypted_tuple = decrypt_tuple(nonce, ciphertext, tag, key)
+# # Decrypt the tuple
+# decrypted_tuple = decrypt_tuple(nonce, ciphertext, tag, key)
 
-print("Original tuple:", data_tuple)
-print("Decrypted tuple:", decrypted_tuple)
+# print("Original tuple:", data_tuple)
+# print("Decrypted tuple:", decrypted_tuple)

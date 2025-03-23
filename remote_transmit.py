@@ -47,7 +47,8 @@ def send_remote_file(config, output_string):
         ssh_client.close()
         os.remove(local_filename) #Clean up local file
 
-        print(f"File '{local_filename}' sent to {config.hostname}:{remote_filepath}")
+        # print(f"File '{local_filename}' sent to {config.hostname}:{remote_filepath}")
+        print(f"File '{local_filename}' sent to {config.hostname}")
 
     except Exception as e:
         print(f"Error sending file to {config.hostname}: {e}")
@@ -66,8 +67,8 @@ def retrieve_remote_files(configs):
     for config in configs:
         try:
             ssh_client = paramiko.SSHClient()
-            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # Be cautious with this in production
-            ssh_client.connect(config.hostname, username=config.username, password=config.password, port=config.port) # Added port
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh_client.connect(config.hostname, username=config.username, password=config.password, port=config.port)
 
             sftp = ssh_client.open_sftp()
             remote_filename = f"secret_share.txt"
@@ -79,22 +80,12 @@ def retrieve_remote_files(configs):
             sftp.close()
             ssh_client.close()
 
-            with open(local_filename, "r") as f:
-                content = f.read().strip()
-                triples = []
-                if content:
-                    try:
-                        triple_strings = content.split('\n')
-                        for triple_string in triple_strings:
-                            int_strings = triple_string.split()
-                            if len(int_strings) == 3:
-                                triples.append(tuple(map(int, int_strings)))
-                            else:
-                                print(f"Warning: Invalid triple format in {config.hostname}:{remote_filepath}")
-                    except ValueError:
-                         print(f"Warning: Invalid integer format in {config.hostname}:{remote_filepath}")
-                results[config.hostname] = triples
-            os.remove(local_filename) #Clean up local file
+            with open(local_filename, "rb") as f: # Open in binary mode!
+                content = f.read()
+
+            results[config.index] = content
+
+            os.remove(local_filename)
             print(f"File '{remote_filename}' retrieved from {config.hostname}")
 
         except Exception as e:

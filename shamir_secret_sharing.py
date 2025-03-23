@@ -4,7 +4,7 @@ MODULUS = 2**127 - 1
 NUM_HONEST_PARTICIPANTS = 3  # Example threshold (k)
 NUM_PARTICIPANTS = 5         # Example number of shares (n)
 
-def split_secret(secret, seed):
+def split_secret(secret, seed, num_participants=-1, num_honest_participants=-1):
     """
     Splits a secet into many shares, stored as a set of tuples, with indecies related for later reconstruction
 
@@ -15,9 +15,16 @@ def split_secret(secret, seed):
     Returns:
         shares (list): A list of tuples of (x,y) pairs comprising of a secret share
     """
+    
+    # Set participants to default if no additional arguments are given
+    if num_participants == -1:
+        num_participants = NUM_PARTICIPANTS
+    if num_honest_participants == -1:
+        num_honest_participants = NUM_HONEST_PARTICIPANTS
+    
     if secret >= MODULUS:
         raise ValueError("Secret must be less than the modulus.")
-    t = NUM_HONEST_PARTICIPANTS
+    t = num_honest_participants
     rng = RomuQuad(seed)
     coefficients = [secret]
     # Coefficients for polynomial are randomly generated using a pseudorandom number generator
@@ -27,14 +34,14 @@ def split_secret(secret, seed):
 
     # Shares are created via evaluating polynomial at various points
     shares = []
-    for x in range(1, NUM_PARTICIPANTS + 1):
+    for x in range(1, num_participants + 1):
         y = 0
         for i in range(t):
             y = (y + coefficients[i] * (x ** i)) % MODULUS
         shares.append((x, y))
     return shares
 
-def reconstruct_secret(shares):
+def reconstruct_secret(shares, num_honest_participants=-1):
     """
     Recieves at least NUM_HONEST_PARTICIPANTS shares, stored as a set of tuples, and returns the original secret
 
@@ -44,7 +51,12 @@ def reconstruct_secret(shares):
     Returns:
         secret (int): The original secret that was inputted at the start of the scheme
     """
-    if len(shares) < NUM_HONEST_PARTICIPANTS:
+    # Set participants to default if no additional arguments are given
+    if num_honest_participants == -1:
+        num_honest_participants = NUM_HONEST_PARTICIPANTS
+
+    # Ensure that we have enough shares
+    if len(shares) < num_honest_participants:
         raise ValueError("Not enough shares to reconstruct the secret.")
 
     # Typical Lagrange interpolation, not much more to say
