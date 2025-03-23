@@ -7,6 +7,7 @@ The entry point of the program is `main.py`, with the other files acting as supp
 To run the code, simply run `python3 main.py` in the terminal. If the compiler complains about a missing dependency, simply run `pip install <DEPENDENCY>` or another similar command. Dependencies are used to manage cryptography primitives and distributed system primitives. In particular:
 
 -> `paramiko`: Dependency is used for ssh connections and secure file transfer protocol for the distributed system
+
 -> `pycryptodome`: Dependency is used for AES-GCM encryption and authentication, as well as SHA-3 hashing
 
 Each file will now be described below:
@@ -19,6 +20,7 @@ Peforms the shamir secret sharing algorithm. `split_secret` generates secret sha
 
 ## `romu_quad_implementation.py`
 [Source paper](https://arxiv.org/pdf/2002.11331)
+
 Performs nonlinear-shift register operations, and is a simple implementation based on the paper. Should be more secure than a typical linear feedback shift register due to the introduction of non-linear operations (e.g. multiplication and bit rotations), and it should be more performant, in that if it is implemented in `C`, it should have very low register pressure and require few cycles per compute.
 
 Is used in `shamir_secret_sharing.py` for the random polynomial construction
