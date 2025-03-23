@@ -1,17 +1,17 @@
 import paramiko
 import os
 
-# Example struct (replace with your actual struct)
+from remote_config_entries import remote_configs
+'''
 class RemoteConfig:
-    def __init__(self, hostname, username, password, remote_path, index):
+    def __init__(self, hostname, username, password, remote_path, index, port=22): # Added port, defaults to 22
         self.hostname = hostname
         self.username = username
         self.password = password
         self.remote_path = remote_path
+        self.port = port # Store the port number
         self.index = index
-
-# Global list of structs
-remote_configs = []
+'''
 
 def send_remote_file(config, output_string):
     """
@@ -22,18 +22,24 @@ def send_remote_file(config, output_string):
         output_string (str): The string containing the data to write to the file.
     """
     try:
+        # Attempt to create the client
         ssh_client = paramiko.SSHClient()
+        # Set the key policy
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Be cautious with this in production
-        ssh_client.connect(config.hostname, username=config.username, password=config.password)
+        # Connect to the client
+        ssh_client.connect(config.hostname, username=config.username, password=config.password, port=config.port) # Added port
 
-        local_filename = f"output_{config.index}.txt"
+        # Store the secret share in a file
+        local_filename = f"secret_share.txt"
         with open(local_filename, "w") as f:
             f.write(output_string)
 
+        # Deploy the secure file transfer protocol to transmit the file
         sftp = ssh_client.open_sftp()
         remote_filepath = os.path.join(config.remote_path, local_filename)
         sftp.put(local_filename, remote_filepath)
 
+        # Close the connections
         sftp.close()
         ssh_client.close()
         os.remove(local_filename) #Clean up local file
@@ -58,10 +64,10 @@ def retrieve_remote_files(configs):
         try:
             ssh_client = paramiko.SSHClient()
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # Be cautious with this in production
-            ssh_client.connect(config.hostname, username=config.username, password=config.password)
+            ssh_client.connect(config.hostname, username=config.username, password=config.password, port=config.port) # Added port
 
             sftp = ssh_client.open_sftp()
-            remote_filename = f"output_{config.index}.txt"
+            remote_filename = f"secret_share.txt"
             remote_filepath = os.path.join(config.remote_path, remote_filename)
 
             local_filename = f"retrieved_{config.index}.txt"
@@ -92,10 +98,7 @@ def retrieve_remote_files(configs):
             print(f"Error retrieving file from {config.hostname}: {e}")
     return results
 
-# Example usage:
-# Create example remote configs
-remote_configs.append(RemoteConfig("remote_host1", "user1", "password1", "/tmp", 0))
-remote_configs.append(RemoteConfig("remote_host2", "user2", "password2", "/home/user2", 1))
+
 
 # Example output string
 output_string1 = "1 2 3\n4 5 6\n7 8 9"
@@ -103,7 +106,9 @@ output_string2 = "10 11 12\n13 14 15"
 
 # Send files
 send_remote_file(remote_configs[0], output_string1)
+print("Sent files to user1")
 send_remote_file(remote_configs[1], output_string2)
+print("Sent files to user2")
 
 # Retrieve and parse files
 retrieved_data = retrieve_remote_files(remote_configs)
