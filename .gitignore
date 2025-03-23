@@ -1,1 +1,3 @@
 remote_config_entries.py
+__pycache__/*
+hawcx_env/*

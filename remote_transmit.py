@@ -1,15 +1,18 @@
+
+# sudo apt install python3-paramiko
 import paramiko
 import os
 
 from remote_config_entries import remote_configs
 '''
 class RemoteConfig:
-    def __init__(self, hostname, username, password, remote_path, index, port=22): # Added port, defaults to 22
+    def __init__(self, hostname, username, password, remote_path, index, port=22, nonce=0): # Added port, defaults to 22
         self.hostname = hostname
         self.username = username
         self.password = password
         self.remote_path = remote_path
-        self.port = port # Store the port number
+        self.port = port
+        self.nonce = nonce
         self.index = index
 '''
 
@@ -100,16 +103,16 @@ def retrieve_remote_files(configs):
 
 
 
-# Example output string
-output_string1 = "1 2 3\n4 5 6\n7 8 9"
-output_string2 = "10 11 12\n13 14 15"
+# # Example output string
+# output_string1 = "1 2 3\n4 5 6\n7 8 9"
+# output_string2 = "10 11 12\n13 14 15"
 
-# Send files
-send_remote_file(remote_configs[0], output_string1)
-print("Sent files to user1")
-send_remote_file(remote_configs[1], output_string2)
-print("Sent files to user2")
+# # Send files
+# send_remote_file(remote_configs[0], output_string1)
+# print("Sent files to user1")
+# send_remote_file(remote_configs[1], output_string2)
+# print("Sent files to user2")
 
-# Retrieve and parse files
-retrieved_data = retrieve_remote_files(remote_configs)
-print("Retrieved data:", retrieved_data)
+# # Retrieve and parse files
+# retrieved_data = retrieve_remote_files(remote_configs)
+# print("Retrieved data:", retrieved_data)
