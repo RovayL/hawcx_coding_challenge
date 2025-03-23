@@ -45,5 +45,5 @@ The function `send_remote_file` takes in a `RemoteConfig` object and a string, a
 
 The function `retrieve_remote_files` takes in a list of `RemoteConfig` objects and retrieves all the relevant data (that is stored in `secret_share.txt`) and stores it in a dictionary, indexed via the `index` attribute.
 
-## 'dummy_remote_config_entries.py'
+## `dummy_remote_config_entries.py`
 Not the real config file (on my system, the real config file is called **`remote_config_entries.py`**), however the actual config file is exactly the same except for each `remote_configs.append(RemoteConfig("host_or_IP_0", "user_0", "password_0", "/file/location_0", index_0, port_0))`, legitimate values are placed.
